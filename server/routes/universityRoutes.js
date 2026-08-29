@@ -1,15 +1,16 @@
-const express = require('express');
-const router = express.Router();
-const {
+import express from 'express';
+import {
   getUniversities,
   getUniversityById,
   acceptChallenge
-} = require('../controllers/universityController');
-const { protect } = require('../middleware/authMiddleware');
-const { authorize } = require('../middleware/roleMiddleware');
+} from '../controllers/universityController.js';
+import { protect } from '../middleware/authMiddleware.js';
+import { authorize } from '../middleware/roleMiddleware.js';
+
+const router = express.Router();
 
 router.get('/', getUniversities);
 router.get('/:id', getUniversityById);
 router.post('/challenges/:problemId/accept', protect, authorize('university', 'admin'), acceptChallenge);
 
-module.exports = router;
+export default router;

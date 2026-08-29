@@ -1,10 +1,9 @@
 /**
  * Mock AI Service for Triveni (SIH 2026 PS 26043)
  * Analyzes problem titles & descriptions using rule-based/keyword classification algorithms.
- * Designed so that an OpenAI / Google Gemini / HuggingFace API client can easily be plugged in.
  */
 
-const analyzeProblem = async ({ title = '', description = '', category = '' }) => {
+export const analyzeProblem = async ({ title = '', description = '', category = '' }) => {
   const text = `${title} ${description}`.toLowerCase();
 
   let detectedCategory = category || 'Other';
@@ -65,7 +64,6 @@ const analyzeProblem = async ({ title = '', description = '', category = '' }) =
     keywords = ['flood warning', 'disaster response', 'river level monitoring', 'climate resilience'];
     estimatedImpact = '15,000 citizens in flood zone';
   } else {
-    // Default Fallback Keyword generation
     const words = text.split(/\s+/).filter(w => w.length > 4);
     keywords = Array.from(new Set(words)).slice(0, 5);
     if (priority === 'MEDIUM' && (text.includes('urgent') || text.includes('severe') || text.includes('immediate'))) {
@@ -85,6 +83,6 @@ const analyzeProblem = async ({ title = '', description = '', category = '' }) =
   };
 };
 
-module.exports = {
+export default {
   analyzeProblem
 };

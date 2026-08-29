@@ -1,4 +1,4 @@
-const authorize = (...roles) => {
+export const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ message: 'User not authenticated' });
@@ -13,5 +13,3 @@ const authorize = (...roles) => {
     next();
   };
 };
-
-module.exports = { authorize };

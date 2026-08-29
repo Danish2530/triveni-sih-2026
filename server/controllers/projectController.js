@@ -1,11 +1,11 @@
-const Project = require('../models/Project');
-const Problem = require('../models/Problem');
-const University = require('../models/University');
-const Notification = require('../models/Notification');
+import Project from '../models/Project.js';
+import Problem from '../models/Problem.js';
+import University from '../models/University.js';
+import Notification from '../models/Notification.js';
 
 // @desc Create a project for an accepted challenge
 // @route POST /api/projects
-exports.createProject = async (req, res) => {
+export const createProject = async (req, res) => {
   try {
     const {
       problemId,
@@ -84,7 +84,7 @@ exports.createProject = async (req, res) => {
 
 // @desc Get all projects
 // @route GET /api/projects
-exports.getProjects = async (req, res) => {
+export const getProjects = async (req, res) => {
   try {
     const { status, universityId } = req.query;
     const filter = {};
@@ -105,7 +105,7 @@ exports.getProjects = async (req, res) => {
 
 // @desc Get single project details
 // @route GET /api/projects/:id
-exports.getProjectById = async (req, res) => {
+export const getProjectById = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id)
       .populate('problemId')
@@ -124,7 +124,7 @@ exports.getProjectById = async (req, res) => {
 
 // @desc Update project details/status/progress
 // @route PUT /api/projects/:id
-exports.updateProject = async (req, res) => {
+export const updateProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     if (!project) {
@@ -135,7 +135,6 @@ exports.updateProject = async (req, res) => {
     project.updatedAt = Date.now();
     await project.save();
 
-    // Sync Problem status if project reached Deployed/Completed
     if (['Deployed', 'Completed'].includes(project.status)) {
       await Problem.findByIdAndUpdate(project.problemId, { status: project.status === 'Deployed' ? 'Deployed' : 'Resolved' });
     }
@@ -148,7 +147,7 @@ exports.updateProject = async (req, res) => {
 
 // @desc Add Milestone to Project
 // @route POST /api/projects/:id/milestones
-exports.addMilestone = async (req, res) => {
+export const addMilestone = async (req, res) => {
   try {
     const { title, description, dueDate } = req.body;
     const project = await Project.findById(req.params.id);
@@ -172,7 +171,7 @@ exports.addMilestone = async (req, res) => {
 
 // @desc Update Milestone status
 // @route PUT /api/projects/:id/milestones/:milestoneId
-exports.updateMilestone = async (req, res) => {
+export const updateMilestone = async (req, res) => {
   try {
     const { status } = req.body;
     const project = await Project.findById(req.params.id);
@@ -190,7 +189,6 @@ exports.updateMilestone = async (req, res) => {
       milestone.completedAt = new Date();
     }
 
-    // Recalculate progress percentage
     const completedCount = project.milestones.filter(m => m.status === 'Completed').length;
     project.progress = Math.round((completedCount / project.milestones.length) * 100);
 
@@ -203,7 +201,7 @@ exports.updateMilestone = async (req, res) => {
 
 // @desc Update Kanban columns
 // @route PUT /api/projects/:id/kanban
-exports.updateKanban = async (req, res) => {
+export const updateKanban = async (req, res) => {
   try {
     const { kanban } = req.body;
     const project = await Project.findById(req.params.id);

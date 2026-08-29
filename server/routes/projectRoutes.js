@@ -1,6 +1,5 @@
-const express = require('express');
-const router = express.Router();
-const {
+import express from 'express';
+import {
   createProject,
   getProjects,
   getProjectById,
@@ -8,9 +7,11 @@ const {
   addMilestone,
   updateMilestone,
   updateKanban
-} = require('../controllers/projectController');
-const { protect } = require('../middleware/authMiddleware');
-const { authorize } = require('../middleware/roleMiddleware');
+} from '../controllers/projectController.js';
+import { protect } from '../middleware/authMiddleware.js';
+import { authorize } from '../middleware/roleMiddleware.js';
+
+const router = express.Router();
 
 router.route('/')
   .get(getProjects)
@@ -24,4 +25,4 @@ router.post('/:id/milestones', protect, authorize('university', 'admin'), addMil
 router.put('/:id/milestones/:milestoneId', protect, authorize('university', 'admin'), updateMilestone);
 router.put('/:id/kanban', protect, updateKanban);
 
-module.exports = router;
+export default router;

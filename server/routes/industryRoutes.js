@@ -1,17 +1,18 @@
-const express = require('express');
-const router = express.Router();
-const {
+import express from 'express';
+import {
   getIndustryProjects,
   partnerWithProject,
   getPartnerships,
   updatePartnershipStatus
-} = require('../controllers/industryController');
-const { protect } = require('../middleware/authMiddleware');
-const { authorize } = require('../middleware/roleMiddleware');
+} from '../controllers/industryController.js';
+import { protect } from '../middleware/authMiddleware.js';
+import { authorize } from '../middleware/roleMiddleware.js';
+
+const router = express.Router();
 
 router.get('/projects', getIndustryProjects);
 router.post('/projects/:id/partner', protect, authorize('industry', 'admin'), partnerWithProject);
 router.get('/partnerships', getPartnerships);
 router.put('/partnerships/:id/status', protect, authorize('university', 'admin'), updatePartnershipStatus);
 
-module.exports = router;
+export default router;

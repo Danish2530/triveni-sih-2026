@@ -1,31 +1,24 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const connectDB = async () => {
-  const primaryUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/triveni';
+  const primaryUri = process.env.MONGO_URI;
+
+  if (!primaryUri) {
+    throw new Error("MONGO_URI is not defined in environment variables");
+  }
 
   try {
-    console.log(`Connecting to primary MongoDB at: ${primaryUri}`);
+    console.log("🔄 Connecting to MongoDB...");
+
     await mongoose.connect(primaryUri, {
-      serverSelectionTimeoutMS: 3000
+      serverSelectionTimeoutMS: 10000
     });
-    console.log('✅ Connected successfully to primary MongoDB instance.');
-  } catch (primaryErr) {
-    console.warn('⚠️ Could not connect to primary MongoDB instance:', primaryErr.message);
-    console.log('🔄 Attempting fallback to in-memory MongoDB for local dev/testing...');
-    
-    try {
-      const { MongoMemoryServer } = require('mongodb-memory-server');
-      const mongod = await MongoMemoryServer.create();
-      const fallbackUri = mongod.getUri();
-      console.log(`Fallback MongoMemoryServer running at: ${fallbackUri}`);
-      
-      await mongoose.connect(fallbackUri);
-      console.log('✅ Connected successfully to fallback in-memory MongoDB instance.');
-    } catch (fallbackErr) {
-      console.error('❌ Failed to connect to fallback MongoDB as well:', fallbackErr.message);
-      process.exit(1);
-    }
+
+    console.log("✅ MongoDB connected successfully!");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error.message);
+    throw error;
   }
 };
 
-module.exports = connectDB;
+export default connectDB;

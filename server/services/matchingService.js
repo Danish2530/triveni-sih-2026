@@ -1,12 +1,10 @@
 /**
  * University Matching Algorithm Service for Triveni
- * Matches submitted societal problems with the most suitable universities based on expertise,
- * research focus, department capabilities, and geographic proximity.
  */
 
-const University = require('../models/University');
+import University from '../models/University.js';
 
-const matchUniversitiesForProblem = async (problem) => {
+export const matchUniversitiesForProblem = async (problem) => {
   try {
     const universities = await University.find({});
     
@@ -19,9 +17,8 @@ const matchUniversitiesForProblem = async (problem) => {
     const problemDistrict = problem.district || '';
 
     const matched = universities.map(uni => {
-      let score = 50; // Base score for participating universities
+      let score = 50;
 
-      // Category match (up to +25 points)
       const matchesCategory = uni.expertise.some(exp => 
         exp.toLowerCase().includes(problemCategory.toLowerCase()) || 
         problemCategory.toLowerCase().includes(exp.toLowerCase())
@@ -30,7 +27,6 @@ const matchUniversitiesForProblem = async (problem) => {
       );
       if (matchesCategory) score += 25;
 
-      // Skill overlap match (up to +20 points)
       let skillMatchCount = 0;
       problemSkills.forEach(skill => {
         const hasSkill = uni.expertise.some(exp => exp.toLowerCase().includes(skill.toLowerCase())) ||
@@ -42,12 +38,10 @@ const matchUniversitiesForProblem = async (problem) => {
         score += Math.min(20, Math.round((skillMatchCount / problemSkills.length) * 20));
       }
 
-      // District / Proximity bonus (+5 points if in same district/region)
       if (uni.location.toLowerCase().includes(problemDistrict.toLowerCase()) || (uni.district && uni.district.toLowerCase() === problemDistrict.toLowerCase())) {
         score += 5;
       }
 
-      // Ensure cap at 98% for realistic scoring
       const matchScore = Math.min(98, Math.max(60, score));
 
       return {
@@ -60,7 +54,6 @@ const matchUniversitiesForProblem = async (problem) => {
       };
     });
 
-    // Sort by highest match score
     matched.sort((a, b) => b.matchScore - a.matchScore);
 
     return matched;
@@ -70,6 +63,6 @@ const matchUniversitiesForProblem = async (problem) => {
   }
 };
 
-module.exports = {
+export default {
   matchUniversitiesForProblem
 };

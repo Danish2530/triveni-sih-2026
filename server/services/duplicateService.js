@@ -1,10 +1,8 @@
 /**
  * Duplicate Detection Service for Triveni
- * Performs keyword-overlap similarity matching between a newly proposed problem
- * and existing database problems to prevent duplicate challenge submissions.
  */
 
-const Problem = require('../models/Problem');
+import Problem from '../models/Problem.js';
 
 const extractKeywords = (text) => {
   if (!text) return new Set();
@@ -27,9 +25,8 @@ const calculateJaccardSimilarity = (setA, setB) => {
   return unionCount === 0 ? 0 : (intersectionCount / unionCount);
 };
 
-const checkForDuplicates = async ({ title, description, category, district }) => {
+export const checkForDuplicates = async ({ title, description, category, district }) => {
   try {
-    // Search existing active problems
     const existingProblems = await Problem.find({ status: { $ne: 'Resolved' } }).limit(50);
     const newKeywords = extractKeywords(`${title} ${description}`);
 
@@ -40,7 +37,6 @@ const checkForDuplicates = async ({ title, description, category, district }) =>
       const existingKeywords = extractKeywords(`${existing.title} ${existing.description}`);
       let sim = calculateJaccardSimilarity(newKeywords, existingKeywords);
 
-      // Boost if category & district match
       if (existing.category === category) sim += 0.15;
       if (existing.district === district) sim += 0.10;
 
@@ -79,6 +75,6 @@ const checkForDuplicates = async ({ title, description, category, district }) =>
   }
 };
 
-module.exports = {
+export default {
   checkForDuplicates
 };

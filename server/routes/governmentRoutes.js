@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import { getGovernmentDashboardData } from '../controllers/governmentController.js';
+
 const router = express.Router();
-const { getGovernmentDashboardData } = require('../controllers/governmentController');
 
 router.get('/government', getGovernmentDashboardData);
 
-module.exports = router;
+export default router;

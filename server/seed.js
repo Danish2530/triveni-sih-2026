@@ -1,14 +1,14 @@
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const connectDB = require('./config/db');
-const User = require('./models/User');
-const Problem = require('./models/Problem');
-const University = require('./models/University');
-const Project = require('./models/Project');
-const Industry = require('./models/Industry');
-const Partnership = require('./models/Partnership');
-const Notification = require('./models/Notification');
-const { analyzeProblem } = require('./services/aiService');
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import connectDB from './config/db.js';
+import User from './models/User.js';
+import Problem from './models/Problem.js';
+import University from './models/University.js';
+import Project from './models/Project.js';
+import Industry from './models/Industry.js';
+import Partnership from './models/Partnership.js';
+import Notification from './models/Notification.js';
+import { analyzeProblem } from './services/aiService.js';
 
 dotenv.config();
 

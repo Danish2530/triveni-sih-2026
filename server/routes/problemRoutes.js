@@ -1,6 +1,5 @@
-const express = require('express');
-const router = express.Router();
-const {
+import express from 'express';
+import {
   createProblem,
   getProblems,
   getProblemById,
@@ -8,9 +7,11 @@ const {
   deleteProblem,
   analyzeProblemOnly,
   matchUniversities
-} = require('../controllers/problemController');
-const { protect } = require('../middleware/authMiddleware');
-const { authorize } = require('../middleware/roleMiddleware');
+} from '../controllers/problemController.js';
+import { protect } from '../middleware/authMiddleware.js';
+import { authorize } from '../middleware/roleMiddleware.js';
+
+const router = express.Router();
 
 router.post('/analyze', analyzeProblemOnly);
 
@@ -25,4 +26,4 @@ router.route('/:id')
 
 router.post('/:id/match', protect, matchUniversities);
 
-module.exports = router;
+export default router;

@@ -1,17 +1,25 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const University = require('../models/University');
-const Industry = require('../models/Industry');
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
+import University from '../models/University.js';
+import Industry from '../models/Industry.js';
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'triveni_sih_2026_super_secret_jwt_key_26043', {
-    expiresIn: '30d'
-  });
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is not configured");
+  }
+
+  return jwt.sign(
+    { id },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "30d"
+    }
+  );
 };
 
 // @desc Register a new user
 // @route POST /api/auth/register
-exports.registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   try {
     const { name, email, password, role, organization, phone } = req.body;
 
@@ -29,7 +37,6 @@ exports.registerUser = async (req, res) => {
       phone: phone || ''
     });
 
-    // Auto-create University or Industry profile if relevant role
     if (user.role === 'university') {
       await University.create({
         name: organization || name,
@@ -68,7 +75,7 @@ exports.registerUser = async (req, res) => {
 
 // @desc Auth user & get token
 // @route POST /api/auth/login
-exports.loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -93,7 +100,7 @@ exports.loginUser = async (req, res) => {
 
 // @desc Get current user profile
 // @route GET /api/auth/me
-exports.getMe = async (req, res) => {
+export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
     res.json(user);

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const partnershipSchema = new mongoose.Schema({
   projectId: {
@@ -33,4 +33,4 @@ const partnershipSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('Partnership', partnershipSchema);
+export default mongoose.model('Partnership', partnershipSchema);

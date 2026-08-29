@@ -1,12 +1,12 @@
-const Problem = require('../models/Problem');
-const Notification = require('../models/Notification');
-const { analyzeProblem } = require('../services/aiService');
-const { matchUniversitiesForProblem } = require('../services/matchingService');
-const { checkForDuplicates } = require('../services/duplicateService');
+import Problem from '../models/Problem.js';
+import Notification from '../models/Notification.js';
+import { analyzeProblem } from '../services/aiService.js';
+import { matchUniversitiesForProblem } from '../services/matchingService.js';
+import { checkForDuplicates } from '../services/duplicateService.js';
 
 // @desc Create a new problem submission
 // @route POST /api/problems
-exports.createProblem = async (req, res) => {
+export const createProblem = async (req, res) => {
   try {
     const {
       title,
@@ -76,7 +76,7 @@ exports.createProblem = async (req, res) => {
 
 // @desc Get all problems
 // @route GET /api/problems
-exports.getProblems = async (req, res) => {
+export const getProblems = async (req, res) => {
   try {
     const { category, district, status, mine } = req.query;
     const filter = {};
@@ -100,7 +100,7 @@ exports.getProblems = async (req, res) => {
 
 // @desc Get single problem details
 // @route GET /api/problems/:id
-exports.getProblemById = async (req, res) => {
+export const getProblemById = async (req, res) => {
   try {
     const problem = await Problem.findById(req.params.id)
       .populate('submittedBy', 'name email organization phone')
@@ -118,7 +118,7 @@ exports.getProblemById = async (req, res) => {
 
 // @desc Update problem status or details
 // @route PUT /api/problems/:id
-exports.updateProblem = async (req, res) => {
+export const updateProblem = async (req, res) => {
   try {
     const problem = await Problem.findById(req.params.id);
     if (!problem) {
@@ -137,7 +137,7 @@ exports.updateProblem = async (req, res) => {
 
 // @desc Delete problem
 // @route DELETE /api/problems/:id
-exports.deleteProblem = async (req, res) => {
+export const deleteProblem = async (req, res) => {
   try {
     const problem = await Problem.findById(req.params.id);
     if (!problem) {
@@ -153,7 +153,7 @@ exports.deleteProblem = async (req, res) => {
 
 // @desc Standalone AI Analysis Endpoint
 // @route POST /api/problems/analyze
-exports.analyzeProblemOnly = async (req, res) => {
+export const analyzeProblemOnly = async (req, res) => {
   try {
     const { title, description, category } = req.body;
     const analysis = await analyzeProblem({ title, description, category });
@@ -170,7 +170,7 @@ exports.analyzeProblemOnly = async (req, res) => {
 
 // @desc Re-calculate University Matches for a problem
 // @route POST /api/problems/:id/match
-exports.matchUniversities = async (req, res) => {
+export const matchUniversities = async (req, res) => {
   try {
     const problem = await Problem.findById(req.params.id);
     if (!problem) {

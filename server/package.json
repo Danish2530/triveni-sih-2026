@@ -2,11 +2,12 @@
   "name": "triveni-server",
   "version": "1.0.0",
   "description": "Backend REST API server for Triveni SIH 2026 PS 26043",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "seed": "node seed.js"
+    "seed:reset": "node seed.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

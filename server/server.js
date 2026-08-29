@@ -1,18 +1,39 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const connectDB = require('./config/db');
-
-// Load Environment Variables
+import dotenv from 'dotenv';
 dotenv.config();
+
+import express from 'express';
+import cors from 'cors';
+import connectDB from './config/db.js';
+
+import authRoutes from './routes/authRoutes.js';
+import problemRoutes from './routes/problemRoutes.js';
+import universityRoutes from './routes/universityRoutes.js';
+import projectRoutes from './routes/projectRoutes.js';
+import industryRoutes from './routes/industryRoutes.js';
+import governmentRoutes from './routes/governmentRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 
 const app = express();
 
 // Connect Database
-connectDB();
+
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://triveni-sih-2026.netlify.app"
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -27,13 +48,13 @@ app.get('/api/health', (req, res) => {
 });
 
 // API Routes
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/problems', require('./routes/problemRoutes'));
-app.use('/api/universities', require('./routes/universityRoutes'));
-app.use('/api/projects', require('./routes/projectRoutes'));
-app.use('/api/industry', require('./routes/industryRoutes'));
-app.use('/api/dashboard', require('./routes/governmentRoutes'));
-app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/auth', authRoutes);
+app.use('/api/problems', problemRoutes);
+app.use('/api/universities', universityRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/industry', industryRoutes);
+app.use('/api/dashboard', governmentRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // 404 Route Handler
 app.use((req, res) => {
@@ -51,7 +72,17 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Triveni Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode.`);
-  console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
-});
+const startServer = async () => {
+  try {
+    await connectDB();
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("❌ Failed to start server:", error.message);
+    process.exit(1);
+  }
+};
+
+startServer();

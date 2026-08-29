@@ -1,11 +1,11 @@
-const Problem = require('../models/Problem');
-const Project = require('../models/Project');
-const University = require('../models/University');
-const Industry = require('../models/Industry');
+import Problem from '../models/Problem.js';
+import Project from '../models/Project.js';
+import University from '../models/University.js';
+import Industry from '../models/Industry.js';
 
 // @desc Get full aggregated metrics for Government Innovation & Impact Dashboard
 // @route GET /api/dashboard/government
-exports.getGovernmentDashboardData = async (req, res) => {
+export const getGovernmentDashboardData = async (req, res) => {
   try {
     const totalProblems = await Problem.countDocuments({});
     const activeProjects = await Project.countDocuments({ status: { $in: ['Planning', 'Development', 'Testing'] } });
@@ -42,7 +42,6 @@ exports.getGovernmentDashboardData = async (req, res) => {
       count: item.count
     }));
 
-    // Calculated / Mocked Social Impact Metrics
     const socialImpact = {
       peopleBenefited: 12450,
       villagesCovered: 18,
@@ -51,7 +50,6 @@ exports.getGovernmentDashboardData = async (req, res) => {
       avgResolutionDays: 38
     };
 
-    // Monthly Submissions Trend (Mocked/Aggregated for 6 months)
     const monthlySubmissions = [
       { month: 'Mar', submitted: 18, resolved: 3 },
       { month: 'Apr', submitted: 26, resolved: 7 },

@@ -1,8 +1,8 @@
-const Notification = require('../models/Notification');
+import Notification from '../models/Notification.js';
 
 // @desc Get notifications for logged in user
 // @route GET /api/notifications
-exports.getNotifications = async (req, res) => {
+export const getNotifications = async (req, res) => {
   try {
     const userRole = req.user ? req.user.role : 'all';
     const userId = req.user ? req.user._id : null;
@@ -23,7 +23,7 @@ exports.getNotifications = async (req, res) => {
 
 // @desc Mark notification as read
 // @route PUT /api/notifications/:id/read
-exports.markAsRead = async (req, res) => {
+export const markAsRead = async (req, res) => {
   try {
     const notification = await Notification.findById(req.params.id);
     if (!notification) {

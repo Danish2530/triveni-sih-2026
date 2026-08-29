@@ -1,11 +1,11 @@
-const Industry = require('../models/Industry');
-const Project = require('../models/Project');
-const Partnership = require('../models/Partnership');
-const Notification = require('../models/Notification');
+import Industry from '../models/Industry.js';
+import Project from '../models/Project.js';
+import Partnership from '../models/Partnership.js';
+import Notification from '../models/Notification.js';
 
 // @desc Get projects available for industry collaboration
 // @route GET /api/industry/projects
-exports.getIndustryProjects = async (req, res) => {
+export const getIndustryProjects = async (req, res) => {
   try {
     const projects = await Project.find({})
       .populate('problemId', 'title category district location urgency affectedPopulation')
@@ -20,7 +20,7 @@ exports.getIndustryProjects = async (req, res) => {
 
 // @desc Industry sends partnership proposal for a project
 // @route POST /api/projects/:id/partner
-exports.partnerWithProject = async (req, res) => {
+export const partnerWithProject = async (req, res) => {
   try {
     const { contributions, message } = req.body;
     const projectId = req.params.id;
@@ -47,7 +47,6 @@ exports.partnerWithProject = async (req, res) => {
       status: 'Pending'
     });
 
-    // Notify University
     if (project.universityId && project.universityId.user) {
       await Notification.create({
         recipientId: project.universityId.user,
@@ -70,7 +69,7 @@ exports.partnerWithProject = async (req, res) => {
 
 // @desc Get all partnerships (filtered by project or industry)
 // @route GET /api/industry/partnerships
-exports.getPartnerships = async (req, res) => {
+export const getPartnerships = async (req, res) => {
   try {
     const { projectId } = req.query;
     const filter = {};
@@ -89,9 +88,9 @@ exports.getPartnerships = async (req, res) => {
 
 // @desc University accepts/rejects industry partnership
 // @route PUT /api/industry/partnerships/:id/status
-exports.updatePartnershipStatus = async (req, res) => {
+export const updatePartnershipStatus = async (req, res) => {
   try {
-    const { status } = req.body; // 'Accepted' or 'Rejected'
+    const { status } = req.body;
     const partnership = await Partnership.findById(req.params.id);
     if (!partnership) {
       return res.status(404).json({ message: 'Partnership request not found' });
@@ -103,7 +102,6 @@ exports.updatePartnershipStatus = async (req, res) => {
     if (status === 'Accepted') {
       const project = await Project.findById(partnership.projectId);
       if (project) {
-        // Add to project's industryPartners list
         project.industryPartners.push({
           industryId: partnership.industryId,
           name: partnership.industryName,
@@ -113,7 +111,6 @@ exports.updatePartnershipStatus = async (req, res) => {
         await project.save();
       }
 
-      // Notify Industry user
       const industry = await Industry.findById(partnership.industryId);
       if (industry && industry.user) {
         await Notification.create({

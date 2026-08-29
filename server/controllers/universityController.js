@@ -1,10 +1,10 @@
-const University = require('../models/University');
-const Problem = require('../models/Problem');
-const Notification = require('../models/Notification');
+import University from '../models/University.js';
+import Problem from '../models/Problem.js';
+import Notification from '../models/Notification.js';
 
 // @desc Get all universities
 // @route GET /api/universities
-exports.getUniversities = async (req, res) => {
+export const getUniversities = async (req, res) => {
   try {
     const universities = await University.find({});
     res.json(universities);
@@ -15,7 +15,7 @@ exports.getUniversities = async (req, res) => {
 
 // @desc Get university details
 // @route GET /api/universities/:id
-exports.getUniversityById = async (req, res) => {
+export const getUniversityById = async (req, res) => {
   try {
     const university = await University.findById(req.params.id);
     if (!university) {
@@ -29,20 +29,17 @@ exports.getUniversityById = async (req, res) => {
 
 // @desc University accepts a challenge
 // @route POST /api/universities/challenges/:problemId/accept
-exports.acceptChallenge = async (req, res) => {
+export const acceptChallenge = async (req, res) => {
   try {
     const { problemId } = req.params;
     
-    // Find problem
     const problem = await Problem.findById(problemId);
     if (!problem) {
       return res.status(404).json({ message: 'Problem challenge not found' });
     }
 
-    // Find University profile for the logged in user or given ID
     let university = await University.findOne({ user: req.user._id });
     if (!university) {
-      // Fallback: search by ID or return first university if demo user
       university = await University.findOne({});
     }
 
@@ -55,7 +52,6 @@ exports.acceptChallenge = async (req, res) => {
     problem.updatedAt = Date.now();
     await problem.save();
 
-    // Create Notification for citizen
     await Notification.create({
       recipientId: problem.submittedBy,
       recipientRole: 'citizen',
@@ -64,7 +60,6 @@ exports.acceptChallenge = async (req, res) => {
       link: `/problems/${problem._id}`
     });
 
-    // Create Notification for university
     await Notification.create({
       recipientId: req.user._id,
       recipientRole: 'university',

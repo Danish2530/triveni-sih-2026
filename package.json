@@ -1,0 +1,21 @@
+{
+  "name": "triveni",
+  "version": "1.0.0",
+  "description": "Triveni - From Community Problems to Real Solutions (SIH 2026 Problem Statement 26043)",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "server": "cd server && npm start",
+    "client": "cd client && npm run dev",
+    "seed": "cd server && node seed.js",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "keywords": [
+    "sih2026",
+    "mern",
+    "triveni",
+    "community-solutions"
+  ],
+  "author": "",
+  "license": "ISC"
+}

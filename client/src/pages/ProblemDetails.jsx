@@ -126,9 +126,25 @@ const ProblemDetails = () => {
 
             {problem.images && problem.images.length > 0 && (
               <div className="mt-6 pt-6 border-t border-slate-100">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Site Photo Documentation</h4>
-                <div className="rounded-xl overflow-hidden border border-slate-200 max-h-64 bg-slate-100">
-                  <img src={problem.images[0]} alt="Problem site photo" className="w-full h-full object-cover" />
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Site Photo Documentation ({problem.images.length})</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {problem.images.map((imgUrl, idx) => (
+                    <a
+                      key={idx}
+                      href={imgUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block rounded-xl overflow-hidden border border-slate-200 bg-slate-100 aspect-square hover:opacity-90 transition-opacity"
+                    >
+                      <img
+                        src={imgUrl}
+                        alt={`Site photo ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </a>
+
+
+                  ))}
                 </div>
               </div>
             )}
@@ -212,8 +228,8 @@ const ProblemDetails = () => {
             </div>
           </Card>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

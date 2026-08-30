@@ -21,7 +21,7 @@ const CitizenDashboard = () => {
   const fetchMyProblems = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/problems');
+      const res = await api.get('/problems?mine=true');
       setProblems(res.data || []);
     } catch (err) {
       console.error('Error fetching citizen problems:', err);

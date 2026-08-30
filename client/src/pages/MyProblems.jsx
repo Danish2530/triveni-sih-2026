@@ -22,7 +22,7 @@ const MyProblems = () => {
   const fetchProblems = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/problems');
+      const res = await api.get('/problems?mine=true');
       setProblems(res.data || []);
     } catch (err) {
       console.error('Error fetching my problems:', err);

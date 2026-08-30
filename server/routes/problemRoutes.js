@@ -16,7 +16,7 @@ const router = express.Router();
 router.post('/analyze', analyzeProblemOnly);
 
 router.route('/')
-  .get(getProblems)
+  .get(protect, getProblems)
   .post(protect, upload.array('images', 5), createProblem);
 
 router.route('/:id')

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, AlertTriangle, CheckCircle, FilePlus, MapPin, UploadCloud, Users, ArrowRight } from 'lucide-react';
+import { Sparkles, AlertTriangle, CheckCircle, FilePlus, MapPin, UploadCloud, Users, ArrowRight, X } from 'lucide-react';
 import api from '../services/api';
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -19,8 +19,9 @@ const SubmitProblem = () => {
     longitude: 87.2479,
     urgency: 'High',
     affectedPopulation: 1200,
-    images: ['https://images.unsplash.com/photo-1541888946425-d0fbb186c5f0?w=600&auto=format&fit=crop&q=60']
   });
+
+  const [imageFiles, setImageFiles] = useState([]);
 
   const [analyzing, setAnalyzing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -62,6 +63,19 @@ const SubmitProblem = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleImageSelect = (e) => {
+    const selected = Array.from(e.target.files);
+    if (selected.length + imageFiles.length > 5) {
+      alert('You can upload a maximum of 5 images.');
+      return;
+    }
+    setImageFiles((prev) => [...prev, ...selected]);
+  };
+
+  const removeImage = (index) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleAiAnalyze = async () => {
     if (!formData.title || !formData.description) {
       alert('Please provide a Title and Description before running AI analysis.');
@@ -97,20 +111,20 @@ const SubmitProblem = () => {
 
     setSubmitting(true);
     try {
-      const payload = {
-        title: formData.title,
-        description: formData.description,
-        category: formData.category,
-        district: formData.district,
-        location: {
-          village: formData.village,
-          latitude: parseFloat(formData.latitude),
-          longitude: parseFloat(formData.longitude)
-        },
-        urgency: formData.urgency,
-        affectedPopulation: parseInt(formData.affectedPopulation),
-        images: formData.images
-      };
+      const payload = new FormData();
+      payload.append('title', formData.title);
+      payload.append('description', formData.description);
+      payload.append('category', formData.category);
+      payload.append('district', formData.district);
+      payload.append('village', formData.village);
+      payload.append('latitude', formData.latitude);
+      payload.append('longitude', formData.longitude);
+      payload.append('urgency', formData.urgency);
+      payload.append('affectedPopulation', formData.affectedPopulation);
+
+      imageFiles.forEach((file) => {
+        payload.append('images', file); // field name MUST match upload.array('images', 5)
+      });
 
       const res = await api.post('/problems', payload);
       const newProblemId = res.data.problem._id;
@@ -279,13 +293,44 @@ const SubmitProblem = () => {
               {/* Upload Mock UI */}
               <div className="pt-2">
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Upload Site Photos / Media
+                  Upload Site Photos (up to 5)
                 </label>
-                <div className="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer">
+                <label
+                  htmlFor="image-upload"
+                  className="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer block"
+                >
                   <UploadCloud className="w-8 h-8 text-slate-400 mx-auto mb-1" />
                   <p className="text-xs font-medium text-slate-600">Drag & drop photos or click to select files</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">JPG, PNG, PDF up to 10MB (Prototype uses mock image URLs)</p>
-                </div>
+                  <p className="text-[10px] text-slate-400 mt-0.5">JPG, PNG up to 10MB each</p>
+                </label>
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+                {imageFiles.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {imageFiles.map((file, idx) => (
+                      <div key={idx} className="relative">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="w-16 h-16 object-cover rounded-lg border border-slate-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(idx)}
+                          className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white rounded-full p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
@@ -338,9 +383,8 @@ const SubmitProblem = () => {
 
                 <div className="flex items-center justify-between py-2 border-y border-indigo-800/80">
                   <span className="text-indigo-300 font-medium">Priority Rating</span>
-                  <span className={`font-bold px-2 py-0.5 rounded text-[11px] ${
-                    aiResult.priority === 'HIGH' || aiResult.priority === 'CRITICAL' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-amber-500/20 text-amber-300'
-                  }`}>
+                  <span className={`font-bold px-2 py-0.5 rounded text-[11px] ${aiResult.priority === 'HIGH' || aiResult.priority === 'CRITICAL' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-amber-500/20 text-amber-300'
+                    }`}>
                     {aiResult.priority}
                   </span>
                 </div>

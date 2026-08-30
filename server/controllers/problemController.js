@@ -3,6 +3,7 @@ import Notification from '../models/Notification.js';
 import { analyzeProblem } from '../services/aiService.js';
 import { matchUniversitiesForProblem } from '../services/matchingService.js';
 import { checkForDuplicates } from '../services/duplicateService.js';
+import { uploadOnCloudinary } from '../services/cloudinary.js';
 
 // @desc Create a new problem submission
 // @route POST /api/problems
@@ -13,13 +14,21 @@ export const createProblem = async (req, res) => {
       description,
       category,
       district,
-      location,
+      village,
+      latitude,
+      longitude,
       urgency,
       affectedPopulation,
-      images,
-      videos,
-      documents
     } = req.body;
+
+    // 0. Upload images to cloudinary (if any were sent)
+    let imageUrls = [];
+    if (req.files && req.files.length > 0) {
+      const uploadResults = await Promise.all(
+        req.files.map((file) => uploadOnCloudinary(file.path))
+      );
+      imageUrls = uploadResults.filter(Boolean).map((r) => r.secure_url || r.url)
+    }
 
     // 1. AI Problem Analysis
     const aiAnalysis = await analyzeProblem({ title, description, category });
@@ -34,12 +43,18 @@ export const createProblem = async (req, res) => {
       category: category || aiAnalysis.category,
       subcategory: aiAnalysis.subcategory,
       district,
-      location: location || { village: '', latitude: 23.3441, longitude: 85.3096 },
+      location: {
+        village: village || '',
+        latitude: latitude ? parseFloat(latitude) : 23.3441,
+        longitude: longitude ? parseFloat(longitude) : 85.3096
+      },
       urgency: urgency || aiAnalysis.priority.charAt(0) + aiAnalysis.priority.slice(1).toLowerCase(),
-      affectedPopulation: affectedPopulation || 500,
-      images: images || ['https://images.unsplash.com/photo-1541888946425-d0fbb186c5f0?w=600&auto=format&fit=crop&q=60'],
-      videos: videos || [],
-      documents: documents || [],
+      affectedPopulation: affectedPopulation ? parseInt(affectedPopulation) : 500,
+      images: imageUrls.length > 0
+        ? imageUrls
+        : ['https://images.unsplash.com/photo-1541888946425-d0fbb186c5f0?w=600&auto=format&fit=crop&q=60'],
+      videos: [],
+      documents: [],
       aiAnalysis,
       status: 'Submitted',
       submittedBy: req.user._id
@@ -158,7 +173,7 @@ export const analyzeProblemOnly = async (req, res) => {
     const { title, description, category } = req.body;
     const analysis = await analyzeProblem({ title, description, category });
     const duplicateCheck = await checkForDuplicates({ title, description, category });
-    
+
     res.json({
       analysis,
       duplicateCheck

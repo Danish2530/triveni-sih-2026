@@ -97,6 +97,20 @@ const problemSchema = new mongoose.Schema({
     ref: 'University'
   },
 
+  recommendedIndustries: [
+    {
+      industryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Industry' },
+      name: { type: String },
+      matchScore: { type: Number }
+    }
+  ],
+
+  duplicateOf: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Problem',
+    default: null
+  },
+
   createdAt: {
     type: Date,
     default: Date.now

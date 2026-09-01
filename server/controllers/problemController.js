@@ -2,11 +2,10 @@ import Problem from '../models/Problem.js';
 import Notification from '../models/Notification.js';
 import { analyzeProblem } from '../services/aiService.js';
 import { matchUniversitiesForProblem } from '../services/matchingService.js';
+import { matchIndustriesForProblem } from '../services/industryMatchingService.js'; // <-- new
 import { checkForDuplicates } from '../services/duplicateService.js';
 import { uploadOnCloudinary } from '../services/cloudinary.js';
 
-// @desc Create a new problem submission
-// @route POST /api/problems
 export const createProblem = async (req, res) => {
   try {
     const {
@@ -27,7 +26,7 @@ export const createProblem = async (req, res) => {
       const uploadResults = await Promise.all(
         req.files.map((file) => uploadOnCloudinary(file.path))
       );
-      imageUrls = uploadResults.filter(Boolean).map((r) => r.secure_url || r.url)
+      imageUrls = uploadResults.filter(Boolean).map((r) => r.secure_url || r.url);
     }
 
     // 1. AI Problem Analysis
@@ -57,27 +56,47 @@ export const createProblem = async (req, res) => {
       documents: [],
       aiAnalysis,
       status: 'Submitted',
-      submittedBy: req.user._id
+      submittedBy: req.user._id,
+      duplicateOf: dupResult.isDuplicate ? dupResult.existingProblem.id : null // <-- new
     });
 
-    // 4. Calculate University Matching Score
-    const matches = await matchUniversitiesForProblem(problem);
-    problem.recommendedUniversities = matches.slice(0, 5).map(m => ({
-      universityId: m.universityId,
-      name: m.name,
-      matchScore: m.matchScore
-    }));
+    // 4. Matching — SKIPPED for duplicates, so only the original gets sent to universities/industries
+    if (!dupResult.isDuplicate) {
+      const uniMatches = await matchUniversitiesForProblem(problem);
+      problem.recommendedUniversities = uniMatches.slice(0, 5).map(m => ({
+        universityId: m.universityId,
+        name: m.name,
+        matchScore: m.matchScore
+      }));
+
+      const industryMatches = await matchIndustriesForProblem(problem); // <-- new
+      problem.recommendedIndustries = industryMatches.slice(0, 5).map(m => ({
+        industryId: m.industryId,
+        name: m.name,
+        matchScore: m.matchScore
+      }));
+    }
 
     await problem.save();
 
-    // 5. Create Notification
-    await Notification.create({
-      recipientId: req.user._id,
-      recipientRole: 'citizen',
-      title: 'Problem Challenge Submitted',
-      message: `Your challenge "${title}" has been successfully logged and analyzed by AI.`,
-      link: `/problems/${problem._id}`
-    });
+    // 5. Notification — different message for duplicates vs originals
+    if (dupResult.isDuplicate) {
+      await Notification.create({
+        recipientId: req.user._id,
+        recipientRole: 'citizen',
+        title: 'Similar Challenge Already Being Addressed',
+        message: `Your challenge "${title}" closely matches an existing report (${dupResult.existingProblem.code}) already under review. It's been logged and linked — no duplicate work will be sent to universities.`,
+        link: `/problems/${dupResult.existingProblem.id}`
+      });
+    } else {
+      await Notification.create({
+        recipientId: req.user._id,
+        recipientRole: 'citizen',
+        title: 'Problem Challenge Submitted',
+        message: `Your challenge "${title}" has been successfully logged and analyzed by AI.`,
+        link: `/problems/${problem._id}`
+      });
+    }
 
     res.status(201).json({
       problem,
@@ -88,6 +107,8 @@ export const createProblem = async (req, res) => {
     res.status(500).json({ message: 'Failed to submit problem challenge', error: error.message });
   }
 };
+
+// ...rest of file (getProblems, getProblemById, etc.) stays exactly as-is
 
 // @desc Get all problems
 // @route GET /api/problems

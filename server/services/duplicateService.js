@@ -37,8 +37,8 @@ export const checkForDuplicates = async ({ title, description, category, distric
       const existingKeywords = extractKeywords(`${existing.title} ${existing.description}`);
       let sim = calculateJaccardSimilarity(newKeywords, existingKeywords);
 
-      if (existing.category === category) sim += 0.15;
-      if (existing.district === district) sim += 0.10;
+      if (existing.category === category) sim += 0.20;
+      if (existing.district === district) sim += 0.15;
 
       const percentage = Math.min(99, Math.round(sim * 100));
 
@@ -48,7 +48,7 @@ export const checkForDuplicates = async ({ title, description, category, distric
       }
     }
 
-    if (highestSimilarity >= 50 && mostSimilarProblem) {
+    if (highestSimilarity >= 40 && mostSimilarProblem) {
       return {
         isDuplicate: true,
         similarityScore: highestSimilarity,

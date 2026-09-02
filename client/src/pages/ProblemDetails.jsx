@@ -17,6 +17,7 @@ import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import Button from '../components/Button';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ImpactProjectionChart from '../components/ImpactProjectionChart';
 
 const ProblemDetails = () => {
   const { id } = useParams();
@@ -203,6 +204,9 @@ const ProblemDetails = () => {
               <p className="text-xs text-indigo-300">Standard rule-based AI classification complete.</p>
             )}
           </div>
+
+          {/* Impact Projection */}
+          <ImpactProjectionChart impact={problem.impact} />
 
           {/* Recommended Universities List */}
           <Card padding="p-5">

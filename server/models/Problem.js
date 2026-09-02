@@ -111,6 +111,24 @@ const problemSchema = new mongoose.Schema({
     default: null
   },
 
+  impact: {
+    score: { type: Number, default: 0 },              // 0-100 composite impact score
+    currentAffected: { type: Number, default: 0 },
+    projected30d: { type: Number, default: 0 },
+    projected90d: { type: Number, default: 0 },
+    projected180d: { type: Number, default: 0 },
+    duplicateCount: { type: Number, default: 0 },
+    factors: {
+      severityWeight: { type: Number, default: 0 },
+      duplicateWeight: { type: Number, default: 0 },
+      urgencyWeight: { type: Number, default: 0 },
+      timeWeight: { type: Number, default: 0 },
+      seasonalityMultiplier: { type: Number, default: 1 }
+    },
+    explanation: { type: String, default: '' },
+    computedAt: { type: Date, default: null }
+  },
+
   createdAt: {
     type: Date,
     default: Date.now

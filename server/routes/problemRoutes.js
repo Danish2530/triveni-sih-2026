@@ -6,7 +6,8 @@ import {
   updateProblem,
   deleteProblem,
   analyzeProblemOnly,
-  matchUniversities
+  matchUniversities,
+  recomputeImpact
 } from '../controllers/problemController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { authorize } from '../middleware/roleMiddleware.js';
@@ -25,5 +26,6 @@ router.route('/:id')
   .delete(protect, authorize('admin', 'citizen'), deleteProblem);
 
 router.post('/:id/match', protect, matchUniversities);
+router.post('/:id/recompute-impact', protect, recomputeImpact);
 
 export default router;
